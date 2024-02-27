@@ -1,0 +1,22 @@
+{
+	"tasks": {
+		"dev": "deno run --watch main.ts"
+	},
+	"fmt": {
+		"semiColons": true,
+		"lineWidth": 9999,
+		"useTabs": true,
+		"indentWidth": 4
+	},
+	"lint": {
+		"rules": {
+			"exclude": [
+				"no-unused-vars",
+				"no-inferrable-types"
+			]
+		}
+	},
+	"compilerOptions": {
+		"noImplicitAny": false
+	}
+}
