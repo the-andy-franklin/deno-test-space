@@ -1,13 +1,10 @@
-const input = 100000;
+const input = Array.from({ length: 200000 }, (_, i) => i);
 
 const arr_start = performance.now();
 
-const arr = Array.from({ length: input }, (_, i) => i);
-
 const arr_answer = (() => {
 	for (let i = 1; true; i++) {
-		if (arr.includes(i)) continue;
-		return i;
+		if (!input.includes(i)) return i;
 	}
 })();
 
@@ -19,14 +16,13 @@ console.log(`arr solution: ${arr_end - arr_start}ms`);
 const obj_start = performance.now();
 
 const obj: { [key: number]: true } = {};
-for (let i = 0; i < input; i++) {
+for (let i = 0; i < input.length; i++) {
 	obj[i] = true;
 }
 
 const obj_answer = (() => {
 	for (let i = 1; true; i++) {
-		if (obj[i]) continue;
-		return i;
+		if (!obj[i]) return i;
 	}
 })();
 

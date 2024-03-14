@@ -15,8 +15,5 @@
 				"no-inferrable-types"
 			]
 		}
-	},
-	"compilerOptions": {
-		"noImplicitAny": false
 	}
 }
