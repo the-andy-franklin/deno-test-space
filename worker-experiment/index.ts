@@ -28,13 +28,13 @@ export class WorkerDispatcher {
 	}
 
 	static fibonacci(): number[] {
-		const sequence = [1, 1];
+		const fib = [1, 1];
 
-		for (let i = 2; i < this.number; i++) {
-			sequence.push(sequence[i - 1] + sequence[i - 2]);
+		for (let i = 2; fib.length < this.number; i++) {
+			fib.push(fib[i - 1] + fib[i - 2]);
 		}
 
-		return sequence;
+		return fib;
 	}
 
 	private static isPrime(n: number): boolean {
@@ -48,7 +48,7 @@ export class WorkerDispatcher {
 	static primes(): number[] {
 		const primes = [];
 
-		for (let i = 2; i < this.number; i++) {
+		for (let i = 2; primes.length < this.number; i++) {
 			if (this.isPrime(i)) primes.push(i);
 		}
 

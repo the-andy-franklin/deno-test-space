@@ -3,7 +3,7 @@
 import { WorkerDispatcher } from "./index.ts";
 
 self.onmessage = () => {
-	const sequence = WorkerDispatcher.primes();
-	self.postMessage(sequence);
+	const primes = WorkerDispatcher.primes();
+	self.postMessage(primes);
 	self.close();
 };

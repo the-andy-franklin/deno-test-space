@@ -3,7 +3,7 @@
 import { WorkerDispatcher } from "./index.ts";
 
 self.onmessage = () => {
-	const sequence = WorkerDispatcher.fibonacci();
-	self.postMessage(sequence);
+	const fib = WorkerDispatcher.fibonacci();
+	self.postMessage(fib);
 	self.close();
 };

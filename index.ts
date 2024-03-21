@@ -1,3 +1,16 @@
-import moment from "npm:moment";
+type ThingBefore = {
+	a: string;
+};
 
-console.log(moment().format());
+type OtherThingBefore = {
+	a: number;
+};
+
+type Simplify<T, U> = {
+	[K in (keyof T | keyof U)]: (
+		| (K extends keyof T ? T[K] : never)
+		| (K extends keyof U ? U[K] : never)
+	);
+};
+
+type Thing = string | unknown;
