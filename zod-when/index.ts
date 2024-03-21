@@ -1,61 +1,53 @@
 // deno-lint-ignore-file no-explicit-any
 import { ZodLiteral } from "npm:zod";
 import { ZodObject } from "npm:zod";
-import { ZodEnum } from "npm:zod";
 import { Primitive } from "npm:zod";
 import { z } from "npm:zod";
 import type { ZodEffects, ZodRawShape, ZodTypeAny } from "npm:zod";
 
 declare module "npm:zod" {
-	interface ZodObject<T extends ZodRawShape> {
-		when<IsSchema extends (ZodLiteral<Primitive> | ZodEnum<[string, ...string[]]>), ThenSchema extends ZodObject<any>>(
-			conditionField: keyof T,
+	interface ZodObject<T extends z.ZodRawShape> {
+		when<
+			ConditionField extends keyof T,
+			IsSchema extends z.ZodLiteral<Primitive>,
+			ThenSchema extends z.ZodObject<any>,
+		>(
+			conditionField: ConditionField,
 			options: {
 				is: IsSchema;
 				then: ThenSchema;
 			},
-		): ZodEffects<
-			ZodTypeAny,
-			| this["_output"]
+		): ZodObject<
+			| this["shape"]
 			| (
-				& {
-					[K in keyof ThenSchema["_output"]]: ThenSchema["_output"][K];
-				}
-				& {
-					[P in "conditionField"]: IsSchema["_output"];
-				}
+				& ThenSchema["shape"]
+				& Record<ConditionField, IsSchema>
 			)
 		>;
 	}
 }
 
-ZodObject.prototype.when = function <
-	T extends ZodRawShape,
-	IsSchema extends (ZodLiteral<Primitive> | ZodEnum<[string, ...string[]]>),
-	ThenSchema extends ZodObject<any>,
->(
-	conditionField: keyof T,
-	{ is, then }: { is: IsSchema; then: ThenSchema },
-) {
-	let newShape;
+z.ZodObject.prototype.when = function (conditionField, { is, then }) {
+	let newShape = z.object(this.shape);
 
-	return z.preprocess((data: any) => {
+	z.custom<ZodObject<any, any, any, any, any>>((data: any) => {
 		if (is.safeParse(data[conditionField]).success) {
-			newShape = Object.assign(
-				{},
-				this.shape,
-				z.object({ [conditionField]: is }).shape,
-				then.shape,
-			);
+			newShape = z.object({
+				...this.shape,
+				...then.shape,
+				[conditionField]: is,
+			});
 		}
 
-		return data;
-	}, newShape!);
+		return true;
+	});
+
+	return newShape as any;
 };
 
 const unknown_data: unknown = {
-	game_mode: "first_to_goal",
-	goal_amount: "10",
+	game_mode: "something_else",
+	goal_amount: false,
 };
 
 const gameSchema = z.object({
@@ -65,6 +57,11 @@ const gameSchema = z.object({
 	is: z.literal("first_to_goal"),
 	then: z.object({
 		goal_amount: z.number(),
+	}),
+}).when("game_mode", {
+	is: z.literal("something_else"),
+	then: z.object({
+		goal_amount: z.boolean(),
 	}),
 });
 
