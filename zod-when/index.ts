@@ -1,20 +1,21 @@
+// deno-lint-ignore-file no-explicit-any
 import { z } from "npm:zod";
-import type { Primitive, ZodEffects, ZodRawShape, ZodSchema, ZodTypeAny } from "npm:zod";
+import type { ZodEffects, ZodRawShape, ZodSchema, ZodTypeAny } from "npm:zod";
 
 declare module "npm:zod" {
 	interface ZodObject<T extends ZodRawShape> {
 		when<ThenSchema extends z.ZodObject<any>>(
 			conditionField: keyof T,
 			options: {
-				is: ZodSchema | Primitive;
+				is: ZodSchema;
 				then: ThenSchema;
 			},
 		): ZodEffects<
 			ZodTypeAny,
 			{
 				[P in (keyof T | keyof ThenSchema["_output"])]:
-					| (P extends keyof ThenSchema["_output"] ? ThenSchema["_output"][P] : never)
-					| (P extends keyof T ? T[P]["_output"] : never);
+					| (P extends keyof T ? T[P]["_output"] : never)
+					| (P extends keyof ThenSchema["_output"] ? ThenSchema["_output"][P] : never);
 			}
 		>;
 	}
@@ -22,23 +23,15 @@ declare module "npm:zod" {
 
 z.ZodObject.prototype.when = function <T extends ZodRawShape, ThenSchema extends z.ZodObject<any>>(
 	conditionField: keyof T,
-	{ is, then }: { is: ZodSchema | Primitive; then: ThenSchema },
+	{ is, then }: { is: ZodSchema; then: ThenSchema },
 ) {
 	return this.refine((data) => {
-		const isZodType = is instanceof z.ZodSchema;
-
-		if (isZodType) {
-			if (is.safeParse(data).success) {
-				then.parse(data);
-			}
-			return true;
-		} else {
-			if (data[conditionField] === is) {
-				then.parse(data);
-			}
-			return true;
+		if (is.safeParse(data[conditionField]).success) {
+			then.parse(data);
 		}
-	}, { message: "Conditional validation failed" });
+
+		return true;
+	});
 };
 
 const unknown_data: unknown = {
@@ -50,7 +43,7 @@ const gameSchema = z.object({
 	game_mode: z.enum(["first_to_goal", "cooperative", "most_at_the_end", "daily_goal"]),
 	goal_amount: z.string(),
 }).when("game_mode", {
-	is: "first_to_goal",
+	is: z.literal("first_to_goal"),
 	then: z.object({
 		goal_amount: z.number(),
 	}),
