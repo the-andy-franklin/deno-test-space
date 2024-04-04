@@ -10,4 +10,3 @@ async function runPythonAdd(a: number, b: number) {
 }
 
 runPythonAdd(10, 5);
-console.log(0);

@@ -11,7 +11,7 @@ const arr_answer = (() => {
 const arr_end = performance.now();
 
 console.log(arr_answer);
-console.log(`arr solution: ${arr_end - arr_start}ms`);
+console.log(`arr solution: ${(arr_end - arr_start) / 1000.000}s`);
 
 const obj_start = performance.now();
 
@@ -29,4 +29,4 @@ const obj_answer = (() => {
 const obj_end = performance.now();
 
 console.log(obj_answer);
-console.log(`obj solution: ${obj_end - obj_start}ms`);
+console.log(`obj solution: ${(obj_end - obj_start) / 1000.000}s`);

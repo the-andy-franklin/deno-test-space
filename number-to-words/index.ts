@@ -112,7 +112,8 @@ export function numberToWords(num: number | string | bigint): string {
 		if (words) result = `${words} ${parts[i]}, ${result}`;
 	}
 
-	if (isNegative) result = `Negative ${result}`;
+	if (isNegative) result = "Negative " + result;
+
 	return result.trim()
 		.replace(/,$/, "")
 		.replace(/,(?!.*(\band\b|,).*$)/, ", and");
