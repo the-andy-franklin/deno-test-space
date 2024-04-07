@@ -1,1 +1,1 @@
-export type ValueOf<T> = T[keyof T];
+export type ValueOf<T extends Record<PropertyKey, unknown>> = T[keyof T];

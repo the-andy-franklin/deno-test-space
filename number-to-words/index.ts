@@ -1,3 +1,15 @@
+const underTen = [
+	"",
+	"One",
+	"Two",
+	"Three",
+	"Four",
+	"Five",
+	"Six",
+	"Seven",
+	"Eight",
+	"Nine",
+];
 const underTwenty = [
 	"",
 	"One",
@@ -32,7 +44,7 @@ const tens = [
 	"Eighty",
 	"Ninety",
 ];
-const parts = [
+const suffix = [
 	"",
 	"Thousand",
 	"Million",
@@ -90,8 +102,8 @@ const parts = [
 function processChunk(chunk: number): string {
 	if (chunk === 0) return "";
 	if (chunk < 20) return underTwenty[chunk];
-	if (chunk < 100) return tens[Math.floor(chunk / 10)] + (chunk % 10 ? "-" + underTwenty[chunk % 10] : "");
-	return underTwenty[Math.floor(chunk / 100)] + " Hundred" + (chunk % 100 ? " and " + processChunk(chunk % 100) : "");
+	if (chunk < 100) return tens[Math.floor(chunk / 10)] + (chunk % 10 ? "-" + underTen[chunk % 10] : "");
+	return underTen[Math.floor(chunk / 100)] + " Hundred" + (chunk % 100 ? " and " + processChunk(chunk % 100) : "");
 }
 
 export function numberToWords(num: number | string | bigint): string {
@@ -109,14 +121,15 @@ export function numberToWords(num: number | string | bigint): string {
 		str = str.slice(0, -3);
 
 		const words = processChunk(+chunk);
-		if (words) result = `${words} ${parts[i]}, ${result}`;
+		if (words) {
+			if (i === 0) result = words;
+			else result = `${words} ${suffix[i]}, ${result}`;
+		}
 	}
 
 	if (isNegative) result = "Negative " + result;
 
-	return result.trim()
-		.replace(/,$/, "")
-		.replace(/,(?!.*(\band\b|,).*$)/, ", and");
+	return result.trim().replace(/,(?!.*(\band\b|,).*$)/, " and");
 }
 
 const exceptions: { [key: string]: string } = {
@@ -129,12 +142,13 @@ const exceptions: { [key: string]: string } = {
 	"Twelve": "Twelfth",
 };
 
-export function numberToOrdinalWords(input: number): string {
-	const words = numberToWords(input);
+export function numberToOrdinalWords(num: number | string | bigint): string {
+	const words = numberToWords(num);
 	if (words === "Invalid input") return "Invalid input";
 
 	const condition = words.match(/(-| )/);
-	const [, prefixWords, splitter, lastWord] = words.match(condition ? /(.*)(-| )(.*?)$/ : /()()(.*)$/) ?? ([] as undefined[]);
+	const [, prefixWords, splitter, lastWord] = words.match(condition ? /(.*)(-| )(.*?)$/ : /()()(.*)$/) ??
+		([] as undefined[]);
 
 	/* deno-fmt-ignore */
 	const ordinalLastWord =
@@ -147,6 +161,6 @@ export function numberToOrdinalWords(input: number): string {
 }
 
 const start = performance.now();
-console.log(numberToWords(1234567892.1234567890));
+console.log(numberToOrdinalWords(123456789123456789123456789123456789123456789123456789123456789123456789n));
 const end = performance.now();
 console.log(`Time: ${end - start}ms`);

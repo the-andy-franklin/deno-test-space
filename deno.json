@@ -7,7 +7,7 @@
 	},
 	"fmt": {
 		"semiColons": true,
-		"lineWidth": 9999,
+		"lineWidth": 120,
 		"useTabs": true,
 		"indentWidth": 4
 	},
