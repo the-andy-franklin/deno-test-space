@@ -1,33 +1,49 @@
 // deno-lint-ignore-file no-explicit-any
 import { assertEquals } from "https://deno.land/std@0.221.0/assert/mod.ts";
 
-const throwDuplicateError = (methodName: string) => () => {
+const willThrowDuplicateError = (methodName: string) => () => {
 	throw new Error(`Duplicate ${methodName}`);
 };
 
-function generateGroupByRecursively(
+const generateGroupByRecursively = (
 	_groupBy: ((arg: any) => any)[],
-	_having: ((arg: any) => boolean) | null,
+	_havingGroups: ((arg: any) => boolean)[][],
+) => function groupByRecursively(
+	items: any[],
+	index: number = 0,
+): any[] {
+	if (index >= _groupBy.length) return items;
+
+	const groupMap: Map<any, any[]> = new Map();
+	items.forEach((item) => {
+		const key = _groupBy[index](item);
+		if (!groupMap.has(key)) groupMap.set(key, []);
+		groupMap.get(key)!.push(item);
+	});
+
+	const grouped = Array.from(groupMap.entries())
+		.map(([key, value]) => [key, groupByRecursively(value, index + 1)]);
+
+	if (!_havingGroups.length) return grouped;
+	return grouped.filter((item) => _havingGroups.every((havingGroup) => havingGroup.some((having) => having(item))));
+};
+
+function joinCollections(
+	collections: any[][],
 ) {
-	return function groupByRecursively(
-		items: any[],
-		index: number = 0,
-	): any[] {
-		if (index >= _groupBy.length) return items;
+	const _collections: any[] = [];
 
-		const groupMap: Map<any, any[]> = new Map();
-		items.forEach((item) => {
-			const key = _groupBy[index](item);
-			if (!groupMap.has(key)) groupMap.set(key, []);
-			groupMap.get(key)!.push(item);
-		});
+	for (let i = 0; i < collections.length - 1; i++) {
+		const remaining_items = collections.slice(i + 1).flat();
 
-		const grouped = Array.from(groupMap.entries())
-			.map(([key, value]) => [key, groupByRecursively(value, index + 1)]);
+		for (const item of collections[i]) {
+			for (const remaining_item of remaining_items) {
+				_collections.push([item, remaining_item]);
+			}
+		}
+	}
 
-		if (!_having) return grouped;
-		return grouped.filter(_having);
-	};
+	return _collections;
 }
 
 export function query() {
@@ -35,32 +51,22 @@ export function query() {
 
 	let _select: ((arg: any) => any) | null = null;
 	let _sort: ((arg1: any, arg2: any) => number) | null = null;
-	let _having: ((arg: any) => boolean) | null = null;
+	const _havingGroups: ((arg: any) => boolean)[][] = [];
 	const _whereGroups: ((arg: any) => boolean)[][] = [];
 	const _groupBy: ((arg: any) => any)[] = [];
 
 	const return_obj = {
 		select: (selectFunction?: (arg: any) => any) => {
 			_select = selectFunction ?? null;
-			return_obj.select = throwDuplicateError("SELECT");
+			return_obj.select = willThrowDuplicateError("SELECT");
 			return return_obj;
 		},
 
-		from: (...collections: any[]) => {
-			if (collections.length >= 2) {
-				for (let i = 0; i < collections.length - 1; i++) {
-					const remaining_items = collections.slice(i + 1).flat();
+		from: (...collections: any[][]) => {
+			if (collections.length === 1) _collections.push(...collections.flat());
+			if (collections.length >= 2) _collections.push(...joinCollections(collections));
 
-					for (const item of collections[i]) {
-						for (const remaining_item of remaining_items) {
-							_collections.push([item, remaining_item]);
-						}
-					}
-				}
-			} else {
-				_collections.push(...collections.flat());
-			}
-			return_obj.from = throwDuplicateError("FROM");
+			return_obj.from = willThrowDuplicateError("FROM");
 			return return_obj;
 		},
 
@@ -71,29 +77,33 @@ export function query() {
 
 		orderBy: (sortFunction: (arg1: any, arg2: any) => number) => {
 			_sort = sortFunction;
-			return_obj.orderBy = throwDuplicateError("ORDERBY");
+
+			return_obj.orderBy = willThrowDuplicateError("ORDERBY");
 			return return_obj;
 		},
 
 		groupBy: (...groupFunctions: ((arg: any) => any)[]) => {
 			_groupBy.push(...groupFunctions);
-			return_obj.groupBy = throwDuplicateError("GROUPBY");
+
+			return_obj.groupBy = willThrowDuplicateError("GROUPBY");
 			return return_obj;
 		},
 
-		having: (havingFunction: (arg: any) => boolean) => {
-			_having = havingFunction;
+		having: (...havingFunctions: ((arg: any) => boolean)[]) => {
+			_havingGroups.push(havingFunctions);
 			return return_obj;
 		},
 
 		execute: () => {
 			let result = _collections;
-			_whereGroups.forEach((setOfOrConditions) => {
-				result = result.filter((item) => setOfOrConditions.some((condition) => condition(item)));
+
+			_whereGroups.forEach((conditions) => {
+				result = result.filter((item) => conditions.some((condition) => condition(item)));
 			});
-			if (_groupBy.length > 0) result = generateGroupByRecursively(_groupBy, _having)(result);
-			if (_select !== null) result = result.map(_select);
+
+			if (_groupBy.length > 0) result = generateGroupByRecursively(_groupBy, _havingGroups)(result);
 			if (_sort !== null) result.sort(_sort);
+			if (_select !== null) result = result.map(_select);
 
 			return result;
 		},
@@ -108,18 +118,22 @@ Deno.test("Basic SELECT tests", () => {
 		query().select().from(numbers).execute(),
 		numbers,
 	);
+
 	assertEquals(
 		query().select().execute(),
 		[],
 	);
+
 	assertEquals(
 		query().from(numbers).execute(),
 		numbers,
 	);
+
 	assertEquals(
 		query().execute(),
 		[],
 	);
+
 	assertEquals(
 		query().from(numbers).select().execute(),
 		numbers,
@@ -178,6 +192,7 @@ Deno.test("Basic SELECT and WHERE over objects", () => {
 		query().select(profession).from(persons).execute(),
 		["teacher", "teacher", "teacher", "scientific", "scientific", "scientific", "politician"],
 	);
+
 	assertEquals(
 		query().select(profession).execute(),
 		[],
@@ -208,6 +223,7 @@ Deno.test("Basic SELECT and WHERE over objects", () => {
 		query().select(name).from(persons).where(isTeacher).execute(),
 		["Peter", "Michael", "Peter"],
 	);
+
 	assertEquals(
 		query().where(isTeacher).from(persons).select(name).execute(),
 		["Peter", "Michael", "Peter"],
@@ -492,13 +508,9 @@ Deno.test("GROUP BY tests", () => {
 	);
 
 	function naturalCompare(value1: any, value2: any) {
-		if (value1 < value2) {
-			return -1;
-		} else if (value1 > value2) {
-			return 1;
-		} else {
-			return 0;
-		}
+		if (value1 < value2) return -1;
+		if (value1 > value2) return 1;
+		return 0;
 	}
 
 	// SELECT profession, count(profession) FROM persons GROUPBY profession ORDER BY profession
@@ -623,13 +635,9 @@ Deno.test("Frequency tests", () => {
 	}
 
 	function naturalCompare(value1: any, value2: any) {
-		if (value1 < value2) {
-			return -1;
-		} else if (value1 > value2) {
-			return 1;
-		} else {
-			return 0;
-		}
+		if (value1 < value2) return -1;
+		if (value1 > value2) return 1;
+		return 0;
 	}
 
 	// SELECT name, sum(value) FROM persons ORDER BY naturalCompare GROUP BY nameGrouping
@@ -658,22 +666,13 @@ Deno.test("Frequency tests", () => {
 	// SELECT number, count(number) FROM numbers GROUP BY number
 	assertEquals(
 		query().select(frequency).from(numbers).groupBy(id).execute(),
-		[{
-			"value": 1,
-			"frequency": 3,
-		}, {
-			"value": 2,
-			"frequency": 2,
-		}, {
-			"value": 3,
-			"frequency": 1,
-		}, {
-			"value": 5,
-			"frequency": 2,
-		}, {
-			"value": 6,
-			"frequency": 2,
-		}],
+		[
+			{ "value": 1, "frequency": 3 },
+			{ "value": 2, "frequency": 2 },
+			{ "value": 3, "frequency": 1 },
+			{ "value": 5, "frequency": 2 },
+			{ "value": 6, "frequency": 2 },
+		],
 	);
 
 	function greatThan1(group: any) {
@@ -762,6 +761,7 @@ Deno.test("Join tests", () => {
 			"teacherName": "Peter",
 		}],
 	);
+
 	assertEquals(
 		query().where(teacherJoin).select(student).where(tutor1).from(teachers, students).execute(),
 		[{
@@ -780,6 +780,7 @@ Deno.test("Duplication exception tests", () => {
 				e instanceof Error,
 				true,
 			);
+
 			assertEquals(
 				e.message,
 				"Duplicate " + duplicate,
@@ -791,19 +792,9 @@ Deno.test("Duplication exception tests", () => {
 		return value;
 	}
 
-	checkError(function () {
-		query().select().select().execute();
-	}, "SELECT");
-	checkError(function () {
-		query().select().from([]).select().execute();
-	}, "SELECT");
-	checkError(function () {
-		query().select().from([]).from([]).execute();
-	}, "FROM");
-	checkError(function () {
-		query().select().from([]).orderBy(id).orderBy(id).execute();
-	}, "ORDERBY");
-	checkError(function () {
-		query().select().groupBy(id).from([]).groupBy(id).execute();
-	}, "GROUPBY");
+	checkError(() => query().select().select().execute(), "SELECT");
+	checkError(() => query().select().from([]).select().execute(), "SELECT");
+	checkError(() => query().select().from([]).from([]).execute(), "FROM");
+	checkError(() => query().select().from([]).orderBy(id).orderBy(id).execute(), "ORDERBY");
+	checkError(() => query().select().groupBy(id).from([]).groupBy(id).execute(), "GROUPBY");
 });

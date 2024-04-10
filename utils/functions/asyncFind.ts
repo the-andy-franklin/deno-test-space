@@ -1,3 +1,4 @@
+import { delay } from "./delay.ts";
 import { getFulfilledPromises } from "./getFulfilledPromises.ts";
 
 export async function asyncFind<T>(
@@ -25,7 +26,7 @@ if (import.meta.main) {
 	};
 
 	const three = await asyncFind(Object.entries(thing), async ([key]) => {
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await delay(1000);
 		return key === "3";
 	});
 

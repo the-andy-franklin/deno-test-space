@@ -1,13 +1,13 @@
-import { Nullish } from "../types/Nullish.ts";
-import { WidenLiteral } from "../types/WidenLiteral.ts";
+import { isNullish } from "./isNullish.ts";
+import type { Nullish } from "../types/Nullish.ts";
+import type { WidenLiteral } from "../types/WidenLiteral.ts";
 
-// deno-lint-ignore no-explicit-any
-export function getValue<T extends Record<PropertyKey, any>>(
+export function getValue<T extends Record<PropertyKey, unknown>>(
 	obj: T | Nullish,
 	key: WidenLiteral<keyof T> | Nullish,
 ): T[keyof T] | undefined {
-	if (obj == null) return;
-	if (key == null) return;
+	if (isNullish(obj)) return;
+	if (isNullish(key)) return;
 
 	if (key in obj) return obj[key];
 }

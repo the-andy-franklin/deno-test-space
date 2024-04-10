@@ -188,6 +188,10 @@
       }
     }
   },
+  "redirects": {
+    "https://deno.land/std/assert/assert_equals.ts": "https://deno.land/std@0.221.0/assert/assert_equals.ts",
+    "https://deno.land/std/testing/asserts.ts": "https://deno.land/std@0.221.0/testing/asserts.ts"
+  },
   "remote": {
     "https://cdn.skypack.dev/-/rxjs@v7.8.1-gMYNr0D48Ik3Uz0dDbiK/dist=es2019,mode=imports/optimized/common/AsyncScheduler-f316237e.js": "71b816e04f29d8ca09471b776336f77f6e7b3f8bd0f10239ea1f19c7dce0608a",
     "https://cdn.skypack.dev/-/rxjs@v7.8.1-gMYNr0D48Ik3Uz0dDbiK/dist=es2019,mode=imports/optimized/common/EmptyError-3e4d38d5.js": "969ba6df6733b5aeaeb0722d8dbdd43471215379fcb165f8a3d9d2e6565ec959",
@@ -252,6 +256,7 @@
     "https://deno.land/std@0.221.0/assert/unimplemented.ts": "47ca67d1c6dc53abd0bd729b71a31e0825fc452dbcd4fde4ca06789d5644e7fd",
     "https://deno.land/std@0.221.0/assert/unreachable.ts": "3670816a4ab3214349acb6730e3e6f5299021234657eefe05b48092f3848c270",
     "https://deno.land/std@0.221.0/fmt/colors.ts": "d239d84620b921ea520125d778947881f62c50e78deef2657073840b8af9559a",
+    "https://deno.land/std@0.221.0/testing/asserts.ts": "0cb9c745d9b157bed062a4aa8647168d2221f6456c385a548b0ca24de9e0f3ca",
     "https://deno.land/x/dongoose@1.0.2/deps.ts": "cb20b257d3e11a3248d70fdea342573d6b8989bc26dfd731be2998f78aee4024",
     "https://deno.land/x/dongoose@1.0.2/mod.ts": "f02f5e2bda0c79e007a5c0fe878189e7a7bf0835ca9440852be15af73597cef7",
     "https://deno.land/x/dongoose@1.0.2/src/schema.ts": "68485d4a6926cc8dbd3c6fc59cc3300cf8836e096c0ff3f0731e788d7cbb1fb9",
