@@ -2,7 +2,7 @@ import { isNullish } from "./isNullish.ts";
 import type { Nullish } from "../types/Nullish.ts";
 import type { WidenLiteral } from "../types/WidenLiteral.ts";
 
-export function getValue<T extends Record<PropertyKey, unknown>>(
+export function getFrom<T extends Record<PropertyKey, unknown>>(
 	obj: T | Nullish,
 	key: WidenLiteral<keyof T> | Nullish,
 ): T[keyof T] | undefined {

@@ -16,27 +16,28 @@ const generateGroupByRecursively = (
 
 	const groupMap: Map<any, any[]> = new Map();
 	items.forEach((item) => {
-		const key = _groupBy[index](item);
+		const key = _groupBy[index]?.(item);
 		if (!groupMap.has(key)) groupMap.set(key, []);
 		groupMap.get(key)!.push(item);
 	});
 
-	const grouped = Array.from(groupMap.entries())
+	const grouped = [...groupMap.entries()]
 		.map(([key, value]) => [key, groupByRecursively(value, index + 1)]);
 
 	if (!_havingGroups.length) return grouped;
 	return grouped.filter((item) => _havingGroups.every((havingGroup) => havingGroup.some((having) => having(item))));
 };
 
-function joinCollections(
-	collections: any[][],
-) {
+function joinCollections(collections: any[][]) {
 	const _collections: any[] = [];
 
 	for (let i = 0; i < collections.length - 1; i++) {
+		const collection = collections[i];
+		if (!collection) continue;
+
 		const remaining_items = collections.slice(i + 1).flat();
 
-		for (const item of collections[i]) {
+		for (const item of collection) {
 			for (const remaining_item of remaining_items) {
 				_collections.push([item, remaining_item]);
 			}
@@ -58,6 +59,7 @@ export function query() {
 	const return_obj = {
 		select: (selectFunction?: (arg: any) => any) => {
 			_select = selectFunction ?? null;
+
 			return_obj.select = willThrowDuplicateError("SELECT");
 			return return_obj;
 		},
