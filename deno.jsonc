@@ -13,14 +13,12 @@
 	"fmt": {
 		"semiColons": true,
 		"lineWidth": 120,
-		"useTabs": true,
-		"indentWidth": 4
+		"useTabs": true
 	},
 	"lint": {
 		"rules": {
 			"exclude": [
-				"no-unused-vars",
-				"no-inferrable-types"
+				"no-unused-vars"
 			]
 		}
 	}
