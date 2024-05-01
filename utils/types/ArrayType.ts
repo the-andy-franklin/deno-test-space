@@ -1,2 +1,1 @@
-// deno-lint-ignore no-explicit-any
-export type ArrayType<T extends any[]> = T extends (infer U)[] ? U : never;
+export type ArrayType<T extends (unknown[] | readonly unknown[])> = T extends (infer U)[] ? U : never;

@@ -7,6 +7,3 @@ const ExampleEnum = {
 } as const;
 
 type ExampleEnum = ValueOf<typeof ExampleEnum>;
-
-let thing: ExampleEnum = ExampleEnum.THING_1;
-thing = "THING_2";

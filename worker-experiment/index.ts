@@ -31,7 +31,7 @@ export class WorkerDispatcher {
 		const fib = [1, 1];
 
 		for (let i = 2; fib.length < this.number; i++) {
-			fib.push(fib[i - 1] + fib[i - 2]);
+			fib.push(fib[i - 1]! + fib[i - 2]!);
 		}
 
 		return fib;

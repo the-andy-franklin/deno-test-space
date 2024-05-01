@@ -1,3 +1,5 @@
+import { throwError } from "../utils/functions/throwError.ts";
+
 const underTen = [
 	"",
 	"One",
@@ -101,7 +103,7 @@ const suffix = [
 
 function processChunk(chunk: number): string {
 	if (chunk === 0) return "";
-	if (chunk < 20) return underTwenty[chunk];
+	if (chunk < 20) return underTwenty[chunk] ?? throwError("Invalid chunk");
 	if (chunk < 100) return tens[Math.floor(chunk / 10)] + (chunk % 10 ? "-" + underTen[chunk % 10] : "");
 	return underTen[Math.floor(chunk / 100)] + " Hundred" + (chunk % 100 ? " and " + processChunk(chunk % 100) : "");
 }
@@ -112,6 +114,8 @@ export function numberToWords(num: number | string | bigint): string {
 	if (!match) return "Invalid input";
 
 	const [, sign, integer, _decimal] = match;
+	if (integer === undefined) return "Invalid input";
+
 	const isNegative = sign === "-";
 	str = integer;
 
@@ -147,8 +151,7 @@ export function numberToOrdinalWords(num: number | string | bigint): string {
 	if (words === "Invalid input") return "Invalid input";
 
 	const condition = words.match(/(-| )/);
-	const [, prefixWords, splitter, lastWord] = words.match(condition ? /(.*)(-| )(.*?)$/ : /()()(.*)$/) ??
-		([] as undefined[]);
+	const [, prefixWords, splitter, lastWord] = words.match(condition ? /(.*)(-| )(.*?)$/ : /()()(.*)$/) ?? [];
 
 	/* deno-fmt-ignore */
 	const ordinalLastWord =

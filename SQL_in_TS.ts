@@ -36,6 +36,7 @@ function joinCollections(collections: any[][]) {
 		if (!collection) continue;
 
 		const remaining_items = collections.slice(i + 1).flat();
+		if (!remaining_items.length) break;
 
 		for (const item of collection) {
 			for (const remaining_item of remaining_items) {
