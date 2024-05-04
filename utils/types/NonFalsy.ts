@@ -1,1 +1,3 @@
-export type NonFalsy<T> = Exclude<T, false | "" | 0 | 0n | null | undefined>;
+import { Falsy } from "./Falsy.ts";
+
+export type NonFalsy<T> = Exclude<T, Falsy>;

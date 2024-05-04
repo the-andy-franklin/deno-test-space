@@ -1,60 +1,75 @@
+import { delay } from "./delay.ts";
+
 type Success<T> = {
 	success: true;
-	value: T;
+	failure: false;
+	data: T;
 };
 
 type Failure = {
 	success: false;
+	failure: true;
 	error: Error;
 };
 
 type Either<T> = Success<T> | Failure;
 
-function createSuccess<T>(value: T): Success<T> {
-	return { success: true, value };
+function createSuccess<T>(data: T): Success<T> {
+	return { success: true, failure: false, data };
 }
 
 function createFailure(error: unknown): Failure {
-	if (error instanceof Error) return { success: false, error };
-	return { success: false, error: new Error(JSON.stringify(error)) };
+	if (error instanceof Error) return { success: false, failure: true, error };
+	return { success: false, failure: true, error: new Error(JSON.stringify(error)) };
 }
 
-export function Try<T>(fn: () => T): Either<T> {
+export function Try<T>(fn: () => Promise<T>): Promise<Either<T>>;
+export function Try<T>(fn: () => T): Either<T>;
+export function Try<T>(fn: (() => T) | (() => Promise<T>)): Either<T> | Promise<Either<T>> {
 	try {
-		return createSuccess(fn());
+		const result = fn();
+		if (result instanceof Promise) {
+			return result
+				.then(createSuccess)
+				.catch(createFailure);
+		}
+
+		return createSuccess(result);
 	} catch (error: unknown) {
 		return createFailure(error);
 	}
 }
 
-export function asyncTry<T>(fn: () => Promise<T>): Promise<Either<T>> {
-	return fn()
-		.then(createSuccess)
-		.catch(createFailure);
-}
-
 // Example usage:
-
 if (import.meta.main) {
-	console.time("Try");
+	const iterations = 10000;
+	const iteration_keys = Array(iterations).keys();
 
-	const result = Try(() => "Hello, World!");
+	const start_try = performance.now();
 
-	if (result.success) console.log(result.value);
-	else console.error(result.error);
+	for (const i of iteration_keys) {
+		Try(() => "Hello, World!");
+	}
 
-	console.timeEnd("Try");
+	const end_try = performance.now();
+
+	const durationInMilliseconds = end_try - start_try;
+	const durationInMicroseconds = durationInMilliseconds * 1e3;
+	console.log(`Duration: ${durationInMicroseconds / iterations} microseconds`);
 	// =================================================
-	console.time("asyncTry");
+	const start_async_try = performance.now();
 
-	const asyncResult = await asyncTry(async () => {
-		await new Promise((resolve) => setTimeout(resolve, 0));
+	for (const i of iteration_keys) {
+		await Try(async () => {
+			await delay(0);
 
-		return "Hello, World!";
-	});
+			"Hello, World!";
+		});
+	}
 
-	if (asyncResult.success) console.log(asyncResult.value);
-	else console.error(asyncResult.error);
+	const end_async_try = performance.now();
 
-	console.timeEnd("asyncTry");
+	const asyncDurationInMilliseconds = end_async_try - start_async_try;
+	const asyncDurationInMicroseconds = asyncDurationInMilliseconds * 1e3;
+	console.log(`Async Duration: ${asyncDurationInMicroseconds / iterations} microseconds`);
 }
