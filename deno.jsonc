@@ -18,7 +18,8 @@
 	"lint": {
 		"rules": {
 			"exclude": [
-				"no-unused-vars"
+				"no-unused-vars",
+				"no-explicit-any"
 			]
 		}
 	}

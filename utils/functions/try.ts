@@ -1,4 +1,6 @@
-import { delay } from "./delay.ts";
+/// <reference types="npm:@types/node" />
+import { nextTick } from "node:process";
+import { range } from "./range.ts";
 
 type Success<T> = {
 	success: true;
@@ -12,7 +14,7 @@ type Failure = {
 	error: Error;
 };
 
-type Either<T> = Success<T> | Failure;
+type Either<F extends Failure, S extends Success<any>> = F | S;
 
 function createSuccess<T>(data: T): Success<T> {
 	return { success: true, failure: false, data };
@@ -23,9 +25,11 @@ function createFailure(error: unknown): Failure {
 	return { success: false, failure: true, error: new Error(JSON.stringify(error)) };
 }
 
-export function Try<T>(fn: () => Promise<T>): Promise<Either<T>>;
-export function Try<T>(fn: () => T): Either<T>;
-export function Try<T>(fn: (() => T) | (() => Promise<T>)): Either<T> | Promise<Either<T>> {
+export function Try<T>(fn: () => Promise<T>): Promise<Either<Failure, Success<T>>>;
+export function Try<T>(fn: () => T): Either<Failure, Success<T>>;
+export function Try<T>(
+	fn: (() => T) | (() => Promise<T>),
+): Either<Failure, Success<T>> | Promise<Either<Failure, Success<T>>> {
 	try {
 		const result = fn();
 		if (result instanceof Promise) {
@@ -43,33 +47,26 @@ export function Try<T>(fn: (() => T) | (() => Promise<T>)): Either<T> | Promise<
 // Example usage:
 if (import.meta.main) {
 	const iterations = 10000;
-	const iteration_keys = Array(iterations).keys();
 
 	const start_try = performance.now();
 
-	for (const i of iteration_keys) {
-		Try(() => "Hello, World!");
+	for (const i of range(iterations)) {
+		Try(() => nextTick(() => {}));
 	}
 
 	const end_try = performance.now();
 
-	const durationInMilliseconds = end_try - start_try;
-	const durationInMicroseconds = durationInMilliseconds * 1e3;
-	console.log(`Duration: ${durationInMicroseconds / iterations} microseconds`);
-	// =================================================
+	const durationInNanoseconds = (end_try - start_try) * 1e6;
+	console.log(`Duration: ${durationInNanoseconds / iterations} ns`);
+	// // =================================================
 	const start_async_try = performance.now();
 
-	for (const i of iteration_keys) {
-		await Try(async () => {
-			await delay(0);
-
-			"Hello, World!";
-		});
+	for (const i of range(iterations)) {
+		await Try(() => Promise.resolve(nextTick(() => {})));
 	}
 
 	const end_async_try = performance.now();
 
-	const asyncDurationInMilliseconds = end_async_try - start_async_try;
-	const asyncDurationInMicroseconds = asyncDurationInMilliseconds * 1e3;
-	console.log(`Async Duration: ${asyncDurationInMicroseconds / iterations} microseconds`);
+	const asyncDurationInNanoseconds = (end_async_try - start_async_try) * 1e6;
+	console.log(`Async Duration: ${asyncDurationInNanoseconds / iterations} ns`);
 }
