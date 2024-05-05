@@ -1,3 +1,4 @@
+// deno-fmt-ignore-file
 /// <reference types="npm:@types/node" />
 import { nextTick } from "node:process";
 import { range } from "./range.ts";
@@ -27,9 +28,7 @@ function createFailure(error: unknown): Failure {
 
 export function Try<T>(fn: () => Promise<T>): Promise<Either<Failure, Success<T>>>;
 export function Try<T>(fn: () => T): Either<Failure, Success<T>>;
-export function Try<T>(
-	fn: (() => T) | (() => Promise<T>),
-): Either<Failure, Success<T>> | Promise<Either<Failure, Success<T>>> {
+export function Try<T>(fn: (() => T) | (() => Promise<T>)): Either<Failure, Success<T>> | Promise<Either<Failure, Success<T>>> {
 	try {
 		const result = fn();
 		if (result instanceof Promise) {
