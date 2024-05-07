@@ -6,12 +6,16 @@ Decimal.set({
 	toExpPos: 100,
 });
 
-const point1 = new Decimal("0.0000000000000000000000000000000000000000000000000000000000000000001");
-const point2 = new Decimal("0.0000000000000000000000000000000000000000000000000000000000000000002");
+// all in miles
+const earth_orbit_radius = new Decimal(93000000);
+const earth_orbit_circumference = earth_orbit_radius.mul(2).mul(Math.PI);
 
-const sum = point1.plus(point2);
+console.log(earth_orbit_circumference.toNumber());
 
-console.log(
-	0.1 + 0.2,
-	sum,
-);
+const light_second = new Decimal(186282);
+const light_minute = light_second.mul(60);
+const light_year = light_second.mul(60).mul(60).mul(24).mul(365);
+
+console.log(light_year.toNumber());
+
+console.log(earth_orbit_circumference.div(light_minute).toNumber());

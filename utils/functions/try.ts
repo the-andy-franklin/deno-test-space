@@ -55,8 +55,8 @@ if (import.meta.main) {
 
 	const end_try = performance.now();
 
-	const durationInNanoseconds = (end_try - start_try) * 1e6;
-	console.log(`Duration: ${durationInNanoseconds / iterations} ns`);
+	const durationInNanoseconds = end_try - start_try;
+	console.log(`Duration: ${durationInNanoseconds} ms`);
 	// // =================================================
 	const start_async_try = performance.now();
 
@@ -66,6 +66,6 @@ if (import.meta.main) {
 
 	const end_async_try = performance.now();
 
-	const asyncDurationInNanoseconds = (end_async_try - start_async_try) * 1e6;
-	console.log(`Async Duration: ${asyncDurationInNanoseconds / iterations} ns`);
+	const asyncDurationInNanoseconds = end_async_try - start_async_try;
+	console.log(`Async Duration: ${asyncDurationInNanoseconds} ms`);
 }
