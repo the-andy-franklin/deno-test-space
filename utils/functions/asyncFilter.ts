@@ -1,4 +1,3 @@
-import { delay } from "./delay.ts";
 import { getFulfilledPromises } from "./getFulfilledPromises.ts";
 
 export async function asyncFilter<T>(
@@ -20,6 +19,8 @@ export async function asyncFilter<T>(
 // Example usage:
 
 if (import.meta.main) {
+	const { delay } = await import("./delay.ts");
+
 	const thing = [0, 1, true, false, "", "hello", NaN, Infinity];
 
 	const filtered_things = await asyncFilter(thing, async (item) => {

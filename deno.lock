@@ -10,6 +10,7 @@
       "npm:effect": "npm:effect@3.0.0",
       "npm:express": "npm:express@4.19.1",
       "npm:fp-ts": "npm:fp-ts@2.16.5",
+      "npm:fraction.js": "npm:fraction.js@4.3.7",
       "npm:lodash": "npm:lodash@4.17.21",
       "npm:moment": "npm:moment@2.30.1",
       "npm:moment-timezone": "npm:moment-timezone@0.5.43",
@@ -656,6 +657,10 @@
       },
       "fp-ts@2.16.5": {
         "integrity": "sha512-N8T8PwMSeTKKtkm9lkj/zSTAnPC/aJIIrQhnHxxkL0KLsRCNUPANksJOlMXxcKKCo7H1ORP3No9EMD+fP0tsdA==",
+        "dependencies": {}
+      },
+      "fraction.js@4.3.7": {
+        "integrity": "sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==",
         "dependencies": {}
       },
       "fresh@0.5.2": {
@@ -2510,5 +2515,11 @@
     "https://esm.sh/react@18.3.1": "52480d4c00855e4f76843caa4f2818eb001671523740cbf064cbd108721c29c8",
     "https://esm.sh/stable/react@18.3.1/denonext/react.mjs": "fc048ffc55366baf7669519127d186761db72046e2bebf35fe8d0de3964defa3",
     "https://esm.sh/v135/lodash@4.17.21/denonext/lodash.mjs": "f04a5db09228738fd8cd06b6d1eaf3463b1b639d1529cf11673c3ac7bda1b1a8"
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:axios",
+      "npm:zod"
+    ]
   }
 }

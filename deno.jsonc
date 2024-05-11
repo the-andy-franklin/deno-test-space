@@ -3,6 +3,8 @@
 		"dev": "deno run --watch main.ts"
 	},
 	"imports": {
+		"axios": "npm:axios",
+		"zod": "npm:zod",
 		"fp-ts/": "https://deno.land/x/fp_ts@v2.11.4/"
 	},
 	"compilerOptions": {

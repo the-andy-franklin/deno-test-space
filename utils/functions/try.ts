@@ -3,18 +3,8 @@
 import { nextTick } from "node:process";
 import { range } from "./range.ts";
 
-type Success<T> = {
-	success: true;
-	failure: false;
-	data: T;
-};
-
-type Failure = {
-	success: false;
-	failure: true;
-	error: Error;
-};
-
+type Success<T> = { success: true; failure: false; data: T; };
+type Failure = { success: false; failure: true; error: Error; };
 type Either<F extends Failure, S extends Success<any>> = F | S;
 
 function createSuccess<T>(data: T): Success<T> {

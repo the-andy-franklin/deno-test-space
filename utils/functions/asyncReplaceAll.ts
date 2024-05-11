@@ -1,13 +1,15 @@
-import { asyncReplace } from "./asyncReplace.ts";
-import { delay } from "./delay.ts";
-
 // deno-fmt-ignore-file
 export async function asyncReplaceAll(
 	target: string,
 	predicate: string | RegExp,
 	replacer: (match: string, ...groups: string[]) => Promise<string> | string,
 ): Promise<string> {
-	if (predicate instanceof RegExp && !predicate.global) throw new Error("Predicate must have the global flag");
+  if (predicate instanceof RegExp && !predicate.global) {
+    const error = new Error("Predicate must have the global flag");
+    Error.captureStackTrace(error, asyncReplaceAll);
+    throw error;
+  }
+
 	if (typeof predicate === "string") predicate = new RegExp(predicate, "g");
 	const matches = [...target.matchAll(predicate)];
 
@@ -32,9 +34,11 @@ export async function asyncReplaceAll(
 
 // Example usage:
 if (import.meta.main) {
+	const { delay } = await import("./delay.ts");
+
 	const str = "The {{quick}} {{brown}} {{fox}} {{jumps}} {{over}} the {{lazy}} {{dog}}";
 
-	const replaced = await asyncReplaceAll(str, /{{(.*?)}}/g, async (match, group) => {
+	const replaced = await asyncReplaceAll(str, /{{(.*?)}}/, async (match, group) => {
 		await delay(1000);
 
 		if (group.length === 3) return group.toUpperCase().replace(/(\w)/g, "$1.");

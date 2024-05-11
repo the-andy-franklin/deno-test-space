@@ -1,4 +1,3 @@
-import { delay } from "./delay.ts";
 import { getFulfilledPromises } from "./getFulfilledPromises.ts";
 
 export async function asyncFind<T>(
@@ -17,6 +16,8 @@ export async function asyncFind<T>(
 
 // Example usage:
 if (import.meta.main) {
+	const { delay } = await import("./delay.ts");
+
 	const thing: { [key: string]: string } = {
 		1: "one",
 		2: "two",

@@ -1,5 +1,4 @@
 import { asyncReplaceAll } from "./asyncReplaceAll.ts";
-import { delay } from "./delay.ts";
 
 // deno-fmt-ignore-file
 export async function asyncReplace(
@@ -14,12 +13,13 @@ export async function asyncReplace(
 	if (match?.index == null) return target;
 
 	const replacement = await replacer(match[0], ...match.slice(1));
-
 	return target.slice(0, match.index) + replacement + target.slice(match.index + match[0].length);
 }
 
 // Example usage:
 if (import.meta.main) {
+	const { delay } = await import("./delay.ts");
+
 	const str = "The {{quick}} {{brown}} fox jumps over the lazy dog";
 
 	const replaced = await asyncReplace(str, /{{(.*?)}}/, async (match, group) => {
