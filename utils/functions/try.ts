@@ -1,10 +1,6 @@
 // deno-fmt-ignore-file
-/// <reference types="npm:@types/node" />
-import { nextTick } from "node:process";
-import { range } from "./range.ts";
-
 type Success<T> = { success: true; failure: false; data: T; };
-type Failure = { success: false; failure: true; error: Error; };
+type Failure = { success: false; failure: true; error: Error };
 type Either<F extends Failure, S extends Success<any>> = F | S;
 
 function createSuccess<T>(data: T): Success<T> {
@@ -35,8 +31,10 @@ export function Try<T>(fn: (() => T) | (() => Promise<T>)): Either<Failure, Succ
 
 // Example usage:
 if (import.meta.main) {
-	const iterations = 10000;
+	const { nextTick } = await import("node:process");
+	const { range } = await import("./range.ts");
 
+	const iterations = 10000;
 	const start_try = performance.now();
 
 	for (const i of range(iterations)) {
@@ -51,7 +49,7 @@ if (import.meta.main) {
 	const start_async_try = performance.now();
 
 	for (const i of range(iterations)) {
-		await Try(() => Promise.resolve(nextTick(() => {})));
+		await Try(() => new Promise<void>((resolve) => nextTick(resolve)))
 	}
 
 	const end_async_try = performance.now();
