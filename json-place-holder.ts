@@ -1,5 +1,5 @@
 import "npm:@total-typescript/ts-reset";
-import z from "npm:zod";
+import z from "zod";
 
 const schema = z.object({
 	userId: z.number(),

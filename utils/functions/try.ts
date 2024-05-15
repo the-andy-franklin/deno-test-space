@@ -1,7 +1,6 @@
 // deno-fmt-ignore-file
 type Success<T> = { success: true; failure: false; data: T; };
 type Failure = { success: false; failure: true; error: Error };
-type Either<F extends Failure, S extends Success<any>> = F | S;
 
 function createSuccess<T>(data: T): Success<T> {
 	return { success: true, failure: false, data };
@@ -12,9 +11,8 @@ function createFailure(error: unknown): Failure {
 	return { success: false, failure: true, error: new Error(JSON.stringify(error)) };
 }
 
-export function Try<T>(fn: () => Promise<T>): Promise<Either<Failure, Success<T>>>;
-export function Try<T>(fn: () => T): Either<Failure, Success<T>>;
-export function Try<T>(fn: (() => T) | (() => Promise<T>)): Either<Failure, Success<T>> | Promise<Either<Failure, Success<T>>> {
+export function Try<T>(fn: () => T): Extract<T, Promise<any>> extends never ? Failure | Success<T> : Promise<Failure | Success<Awaited<T>>>;
+export function Try<T>(fn: () => T): Failure | Success<T> | Promise<Failure | Success<T>> {
 	try {
 		const result = fn();
 		if (result instanceof Promise) {
@@ -38,7 +36,7 @@ if (import.meta.main) {
 	const start_try = performance.now();
 
 	for (const i of range(iterations)) {
-		Try(() => nextTick(() => {}));
+		const thing = Try(() => nextTick(() => {}));
 	}
 
 	const end_try = performance.now();
@@ -49,7 +47,7 @@ if (import.meta.main) {
 	const start_async_try = performance.now();
 
 	for (const i of range(iterations)) {
-		await Try(() => new Promise<void>((resolve) => nextTick(resolve)))
+		const thing = await Try(() => new Promise<void>((resolve) => nextTick(resolve)));
 	}
 
 	const end_async_try = performance.now();

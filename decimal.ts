@@ -6,16 +6,14 @@ Decimal.set({
 	toExpPos: 100,
 });
 
-// all in miles
 const earth_orbit_radius = new Decimal(93000000);
 const earth_orbit_circumference = earth_orbit_radius.mul(2).mul(Math.PI);
 
-console.log(earth_orbit_circumference.toNumber());
-
 const light_second = new Decimal(186282);
 const light_minute = light_second.mul(60);
-const light_year = light_second.mul(60).mul(60).mul(24).mul(365);
 
-console.log(light_year.toNumber());
+const [int, dec] = earth_orbit_circumference.div(light_minute).toString().split(".");
+const _dec = "0." + dec;
+const __dec = new Decimal(_dec).toFraction(10000);
 
-console.log(earth_orbit_circumference.div(light_minute).toNumber());
+console.log(int + "+" + __dec[0] + "/" + __dec[1]);
