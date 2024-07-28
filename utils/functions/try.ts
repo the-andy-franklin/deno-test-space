@@ -7,12 +7,16 @@ export function Success<T>(data: T): Success<T> {
 }
 
 export function Failure(error: unknown): Failure {
-	if (error instanceof Error) return { success: false, failure: true, error };
-	return { success: false, failure: true, error: new Error(JSON.stringify(error)) };
+	return {
+		success: false,
+		failure: true,
+		error: error instanceof Error ? error :
+			new Error(typeof error === 'string' ? error : JSON.stringify(error))
+	};
 }
 
 export function Try<T>(fn: () => T): Extract<T, Promise<any>> extends never ? Failure | Success<T> : Promise<Failure | Success<Awaited<T>>>;
-export function Try<T>(fn: () => T): Failure | Success<T> | Promise<Failure | Success<T>> {
+export function Try<T>(fn: () => T): Failure | Success<T> | Promise<Failure | Success<Awaited<T>>> {
 	try {
 		const result = fn();
 		if (result instanceof Promise) return result.then(Success, Failure)

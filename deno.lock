@@ -2518,7 +2518,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@2or3godzillas/fp-try@^1.1.1",
+      "jsr:@2or3godzillas/fp-try@^1.2.0",
       "npm:axios",
       "npm:zod"
     ]
